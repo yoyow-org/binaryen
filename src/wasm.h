@@ -395,7 +395,7 @@ public:
   Load(MixedArena& allocator) {}
 
   uint8_t bytes;
-  bool signed_;
+  bool signed_    = false;
   Address offset;
   Address align;
   Expression* ptr;
