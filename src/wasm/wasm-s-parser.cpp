@@ -28,7 +28,7 @@
 #include "wasm-builder.h"
 
 #define abort_on(str) { throw ParseException(std::string("abort_on ") + str); }
-#define element_assert(condition) assert((condition) ? true : (std::cerr << "on: " << *this << '\n' && 0));
+#define element_assert(condition) ASSERT_THROW((condition) ? true : (std::cerr << "on: " << *this << '\n' && 0));
 
 using cashew::IString;
 
@@ -124,7 +124,7 @@ Element* SExpressionParser::parse() {
       stack.push_back(curr);
       curr = allocator.alloc<Element>()->setMetadata(line, input - lineStart - 1, loc);
       stackLocs.push_back(loc);
-      assert(stack.size() == stackLocs.size());
+      ASSERT_THROW(stack.size() == stackLocs.size());
     } else if (input[0] == ')') {
       input++;
       auto last = curr;
@@ -132,7 +132,7 @@ Element* SExpressionParser::parse() {
         throw ParseException("s-expr stack empty");
       }
       curr = stack.back();
-      assert(stack.size() == stackLocs.size());
+      ASSERT_THROW(stack.size() == stackLocs.size());
       stack.pop_back();
       loc = stackLocs.back();
       stackLocs.pop_back();
@@ -1339,9 +1339,9 @@ Name SExpressionWasmBuilder::getLabel(Element& s) {
     uint64_t offset;
     try {
       offset = std::stoll(s.c_str(), nullptr, 0);
-    } catch (std::invalid_argument) {
+    } catch (std::invalid_argument&) {
       throw ParseException("invalid break offset");
-    } catch (std::out_of_range) {
+    } catch (std::out_of_range&) {
       throw ParseException("out of range break offset");
     }
     if (offset > nameMapper.labelStack.size()) throw ParseException("invalid label", s.line, s.col);
@@ -1436,9 +1436,9 @@ void SExpressionWasmBuilder::stringToBinary(const char* input, size_t size, std:
     *write++ = input[0];
     input++;
   }
-  assert(write >= data.data());
+  ASSERT_THROW(write >= data.data());
   size_t actual = write - data.data();
-  assert(actual <= data.size());
+  ASSERT_THROW(actual <= data.size());
   data.resize(actual);
 }
 
